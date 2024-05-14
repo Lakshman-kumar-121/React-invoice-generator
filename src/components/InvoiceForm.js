@@ -66,28 +66,25 @@ class InvoiceForm extends React.Component {
   handleCalculateTotal() {
     var items = this.state.items;
     var subTotal = 0;
-
-    items.map(function(items) {
-      subTotal = parseFloat(subTotal + (parseFloat(items.price).toFixed(2) * parseInt(items.quantity))).toFixed(2)
+    var totalTaxAmount = 0;
+    var totalDiscountAmount = 0;
+  
+    items.forEach(item => {
+      var itemTotal = parseFloat(item.price) * parseInt(item.quantity);
+      subTotal += itemTotal;
+      totalTaxAmount += itemTotal * (this.state.taxRate / 100);
+      totalDiscountAmount += itemTotal * (this.state.discountRate / 100);
     });
-
+  
+    var total = subTotal - totalDiscountAmount + totalTaxAmount;
+  
     this.setState({
-      subTotal: parseFloat(subTotal).toFixed(2)
-    }, () => {
-      this.setState({
-        taxAmmount: parseFloat(parseFloat(subTotal) * (this.state.taxRate / 100)).toFixed(2)
-      }, () => {
-        this.setState({
-          discountAmmount: parseFloat(parseFloat(subTotal) * (this.state.discountRate / 100)).toFixed(2)
-        }, () => {
-          this.setState({
-            total: ((subTotal - this.state.discountAmmount) + parseFloat(this.state.taxAmmount))
-          });
-        });
-      });
+      subTotal: subTotal.toFixed(2),
+      taxAmmount: totalTaxAmount.toFixed(2),
+      discountAmmount: totalDiscountAmount.toFixed(2),
+      total: total.toFixed(2)
     });
-
-  };
+  }
   onItemizedItemEdit(evt) {
     var item = {
       id: evt.target.id,
@@ -211,13 +208,7 @@ class InvoiceForm extends React.Component {
               <Form.Label className="fw-bold">Currency:</Form.Label>
               <Form.Select onChange={event => this.onCurrencyChange({currency: event.target.value})} className="btn btn-light my-1" aria-label="Change Currency">
                 <option value="$">USD (United States Dollar)</option>
-                <option value="£">GBP (British Pound Sterling)</option>
-                <option value="¥">JPY (Japanese Yen)</option>
-                <option value="$">CAD (Canadian Dollar)</option>
-                <option value="$">AUD (Australian Dollar)</option>
-                <option value="$">SGD (Signapore Dollar)</option>
-                <option value="¥">CNY (Chinese Renminbi)</option>
-                <option value="₿">BTC (Bitcoin)</option>
+                <option value="₹">INR (Indian Ruppee)</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="my-3">
